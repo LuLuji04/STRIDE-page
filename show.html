@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STRIDE: 基于多模态大模型与安全轨迹生成的端到端自动驾驶系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .github-btn {
+            display: inline-flex;
+            align-items: center;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .github-btn:hover {
+            background: #555;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .github-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            fill: currentColor;
+        }
+        
+        /* Main Content */
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        /* Section Styling */
+        .section {
+            padding: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            border-left: 4px solid #e74c3c;
+            padding-left: 20px;
+            font-weight: bold;
+        }
+        
+        .description {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #444;
+            text-align: justify;
+            margin-bottom: 30px;
+        }
+        
+        /* 项目图片样式 - 关键修复部分 */
+        .project-images {
+            margin-top: 30px;
+        }
+        
+        .image-grid {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .project-image-container {
+            text-align: center;
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .project-image-container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .main-image {
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .project-image {
+            max-width: 100%;
+            height: auto;
+            max-height: 400px; /* 限制最大高度 */
+            width: auto;
+            border-radius: 10px;
+            object-fit: contain; /* 保持图片比例，防止变形 */
+        }
+        
+        .image-caption {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        /* Overview Section */
+        .overview-section {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            text-align: center;
+            padding: 60px 40px;
+        }
+        
+        .overview-title {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .overview-highlight {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+        }
+        
+        .comparison-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .comparison-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;  /* 增加了 padding 来延长文本框 */
+            flex: 1;
+            min-width: 350px; /* 增加最小宽度 */
+            max-width: 500px; /* 增加最大宽度 */
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        
+        /* 修改后的图片对比容器 */
+        .comparison-images {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .comparison-image-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;  /* 增加 padding 使得图片区域更大 */
+            flex: 1;
+            min-width: 350px; /* 增加最小宽度 */
+            max-width: 500px; /* 增加最大宽度 */
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .comparison-image {
+            width: 100%;
+            height: 300px; /* 增加图片高度 */
+            object-fit: contain;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 15px;
+        }
+
+        .comparison-caption {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        /* Video Section */
+        .video-section h2 {
+            font-size: 1.8rem; /* 统一标题字体大小 */
+            color: #2c3e50; /* 统一标题颜色 */
+            margin-bottom: 25px; /* 增加标题下的间距 */
+            border-left: 4px solid #e74c3c; /* 增加左边的红色边框 */
+            padding-left: 20px; /* 给左边框添加一些间距 */
+            font-weight: bold; /* 统一字体加粗 */
+        }
+
+        /* 保持其他部分不变 */
+        .video-section {
+            background: #f8f9fa;
+            text-align: center;
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-placeholder {
+            aspect-ratio: 16/9;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            z-index: 2;
+        }
+        
+        .video-subtitle {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            z-index: 2;
+        }
+        
+        .video-bg-effect {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.3) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+        }
+        
+        /* Core Technology Section */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .tech-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-color: #e74c3c;
+        }
+        
+        .tech-card-title {
+            font-size: 1.4rem;
+            color: #e74c3c;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .tech-list {
+            list-style: none;
+        }
+        
+        .tech-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+            color: #555;
+        }
+        
+        .tech-list li::before {
+            content: '▶';
+            color: #e74c3c;
+            position: absolute;
+            left: 0;
+        }
+        
+        /* Innovation Section - 修复后的样式 */
+        .innovation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .innovation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px; /* 设置最小高度确保卡片有足够空间 */
+        }
+
+        .innovation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .innovation-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .innovation-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1; /* 让描述文本占据剩余空间 */
+        }
+
+        /* 修复后的图片样式 - 关键修改 */
+        .innovation-image {
+            object-fit: fill;
+            width: 100%;
+            max-width: 100%;
+            height: auto;           /* 保持图片原始比例 */
+            min-height: 150px;      /* 如不需要统一高度可移除 */
+            object-fit: contain;    /* 图片完整显示 */
+            margin-top: auto;       /* 可保留用于布局底对齐 */
+        }
+
+
+        .image-placeholder {
+            width: 100%;
+            height: 180px; /* 占位符保持固定高度 */
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            margin-top: auto; /* 推到底部 */
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 一行三张图片 */
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+
+        .result-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .result-image {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            object-fit: contain;
+            max-height: 300px; /* 控制高度防止过高 */
+        }
+
+        .interface-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            overflow-x: auto; /* 超出宽度可横向滚动（防止溢出） */
+            padding-bottom: 10px;
+        }
+
+        .interface-fixed {
+            height: 350px; /* 可按需要调整，例如300-400px之间 */
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+
+        /* 响应式处理：中屏变两列，小屏变一列 */
+        @media (max-width: 1024px) {
+            .interface-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .interface-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        /* For responsive layout */
+        @media (max-width: 1024px) {
+            .innovation-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .innovation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .section {
+                padding: 30px 20px;
+            }
+            
+            .comparison-container,
+            .comparison-images {
+                flex-direction: column;
+            }
+            
+            .comparison-image-item {
+                min-width: auto;
+                max-width: none;
+            }
+            
+            .tech-grid,
+            .innovation-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .project-image {
+                max-height: 300px; /* 移动端进一步限制高度 */
+            }
+            
+            .overview-highlight {
+                font-size: 2rem;
+            }
+
+            .innovation-card {
+                min-height: 350px; /* 移动端稍微减小最小高度 */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .project-image {
+                max-height: 250px; /* 小屏幕设备更小的高度 */
+            }
+            
+            .project-image-container {
+                margin: 10px 0;
+            }
+            
+            .comparison-image {
+                height: 200px;
+            }
+            
+            .innovation-image {
+                min-height: 120px; /* 在小屏幕上减小最小高度 */
+            }
+
+            .innovation-card {
+                min-height: 300px; /* 小屏幕进一步减小最小高度 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <h1 class="title">STRIDE:基于多模态大模型与安全轨迹生成的端到端自动驾驶系统</h1>
+            <p class="subtitle">中国高校计算机大赛-网络技术挑战赛作品</p>
+            <a href="#" class="github-btn">
+                <svg class="github-icon" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                项目代码
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Project Description -->
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">项目概述</h2>
+                <p class="description">
+                    STRIDE构建了一个融合多模态大模型与认知安全机制的端到端自动驾驶系统，旨在解决当前自动驾驶在复杂城市环境中感知不全、指令理解不足与行为预测不稳的问题。该系统集成跨模态语义感知、事故预测、行为建模与安全轨迹生成等核心模块，通过融合视觉、语言和历史驾驶行为数据，构建出感知-预测-规划闭环框架，实现驾驶意图解析与高动态风险响应的深度协同。系统采用基于图神经网络与Transformer的行为建模算法，结合高斯混合解码器生成多模态轨迹预测，并通过定量安全指标（TTC、TIT等）构建感知安全评估机制。借助联邦学习与V2X通信协议，系统不仅具备高适应性的场景泛化能力，还可在边缘设备上实现实时部署，在极端天气和突发事件中依然稳定运行。STRIDE的提出为智慧城市出行、共享出行平台与高危工业场景提供了高鲁棒性、高可扩展性的智能驾驶解决方案。
+                </p>
+
+                <!-- 项目架构图示例区域 -->
+                <div class="project-images">
+                    <div class="image-grid">
+                        <div class="project-image-container main-image">
+                            <img src="项目概述.png" alt="STRIDE项目整体架构图" class="project-image">
+                            <div class="image-caption">STRIDE项目整体架构图</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div class="main-content">
+            <div class="overview-section">
+                <h2 class="overview-title">STRIDE系统设计核心</h2>
+                <div class="overview-highlight">引领下一代认知智能自动驾驶</div>
+                <div class="comparison-container">
+                    <div class="comparison-item">
+                        <h3>传统驾驶方法的不足</h3>
+                        <p>传统自动驾驶系统大多依赖单一模态进行环境感知，面对复杂城市交通场景时易出现感知盲区与误判。其指令生成过程多为手工设计规则或浅层网络，难以理解复杂语义信息，缺乏对动态风险的深层建模能力。同时，传统路径规划通常采用单一最优轨迹预测，无法有效表达未来行为的不确定性，导致安全性欠佳。此外，现有系统对场景变化适应性差，难以在多样化道路、恶劣天气或多车交互等现实环境中稳定运行。</p>
+                    </div>
+                </div>
+                
+                <!-- 修改后的图片对比区域 -->
+                <div class="comparison-images">
+                    <div class="comparison-image-item">
+                        <img src="重构.png" alt="感知决策新范式" class="comparison-image">
+                        <div class="comparison-caption">感知决策新范式</div>
+                    </div>
+                    <div class="comparison-image-item">
+                        <img src="智驾升级.png" alt="多模态智驾升级" class="comparison-image">
+                        <div class="comparison-caption">多模态智驾升级</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Section -->
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">演示视频</h2>
+                <div class="video-container">
+                    [111]
+                </div>
+            </div>
+        </div>
+
+        <!-- Core Technology -->
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">核心技术</h2>
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <h3 class="tech-card-title">模块设计</h3>
+                        <ul class="tech-list">
+                            <li><strong>多模态语义感知模块：</strong>融合图像、语言与地图信息，增强对驾驶场景中交通要素、信号语义和语境的理解。</li>
+                            <li><strong>行为建模与意图预测：</strong>通过图神经网络和Transformer对周围交通体建模，实现高动态交互环境下的意图理解与轨迹预测。</li>
+                            <li><strong>认知安全评估机制：</strong>引入时间碰撞指标与风险趋势指数，对潜在危险进行量化预警，指导安全行为生成。</li>
+                            <li><strong>安全轨迹生成模块：</strong>基于高斯混合模型输出多模态未来轨迹，结合目标导向与风险规避实现安全路径规划。</li>
+                        </ul>                        
+                    </div>
+                    
+                    <div class="tech-card">
+                        <h3 class="tech-card-title">关键技术</h3>
+                        <ul class="tech-list">
+                            <li><strong>跨模态大模型融合：</strong>整合视觉、语言与地图等多源信息，实现统一语义空间对齐与任务理解。</li>
+                            <li><strong>图神经网络建模：</strong>建构车-车与车-道拓扑图，捕捉交通体间的时空依赖关系，实现精确交互建模。</li>
+                            <li><strong>高斯混合轨迹解码器：</strong>以概率形式生成多种潜在轨迹，表达驾驶行为不确定性，提升鲁棒性。</li>
+                            <li><strong>联邦学习与边缘部署：</strong>支持数据隐私保护与跨设备协同训练，在车端与云端之间高效部署。</li>
+                        </ul>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Innovation -->
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">技术创新</h2>
+                <div class="innovation-grid">
+                    <div class="innovation-card">
+                        <h3 class="innovation-title">多模态上下文感知</h3>
+                        <p class="innovation-desc">构建跨模态融合机制，将图像特征与语言指令、地图语义联合编码，通过统一语义空间对驾驶意图、场景元素进行语义增强，显著提升系统在复杂场景下的感知理解能力。</p>
+                        <!-- 示例：添加真实图片时请替换下面的src路径 -->
+                        <img src="上下文感知.png" alt="同态加密流程图" class="innovation-image">
+                    </div>
+                    
+                    <div class="innovation-card">
+                        <h3 class="innovation-title">事故预测及定位</h3>
+                        <p class="innovation-desc">采用图神经网络构建车-车与车-道的交互图结构，结合Transformer捕捉时序动态，精确建模周围交通体的交互行为与潜在风险，提升预测准确性与响应合理性。</p>
+                        <!-- 示例：添加真实图片时请替换下面的src路径 -->
+                        <img src="事故预测.png" alt="区块链网络图" class="innovation-image">
+                    </div>
+                    
+                    <div class="innovation-card">
+                        <h3 class="innovation-title">安全轨迹生成</h3>
+                        <p class="innovation-desc">引入高斯混合解码器生成多模态未来轨迹，融合驾驶意图与风险指标引导路径选择，有效解决传统单轨迹预测带来的模糊性与不确定问题，实现更稳健的路径规划。</p>
+                        <!-- 示例：添加真实图片时请替换下面的src路径 -->
+                        <img src="安全轨迹.png" alt="智能合约流程图" class="innovation-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Results -->
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">作品效果展示</h2>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3 class="result-title">事故预测置信度</h3>
+                        <img src="实现效果1.png" alt="相似度和定位误差分析图" class="result-image">
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3 class="result-title">安全轨迹生成决策</h3>
+                        <img src="实现效果2.png" alt="系统综合测试结果图" class="result-image">
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3 class="result-title">真实场景测试</h3>
+                        <img src="实现效果3.png" alt="定位预测效果图" class="result-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">技术成果</h2>
+                <div class="project-images">
+                    <div class="image-grid">
+                        <div class="project-image-container main-image">
+                            <img src="成果.png" alt="作品成果" class="project-image">
+                            <div class="image-caption">作品成果</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="description">
+                    本项目已取得阶段性成果，成果涵盖人工智能顶会、自动驾驶领域权威期刊与交通智能应用研究等方向，充分验证了系统的创新性与研究价值。
+                </p>
+                <ul class="tech-list">
+                    <li><strong>发表 3 篇 CCF-A 类人工智能顶会论文：</strong><br>
+                        · <strong>IJCAI 2024</strong>（International Joint Conference on Artificial Intelligence）<br>
+                        · <strong>ACM MM 2024</strong>（Oral，Top 3% in Accepted List）<br>
+                        · <strong>AAAI 2024</strong>（Association for the Advancement of Artificial Intelligence）
+                    </li>
+                    <li><strong>发表 2 篇 CCF-B 类人工智能会议论文：</strong><br>
+                        · <strong>ECAI 2024</strong>（European Conference on Artificial Intelligence）<br>
+                        · <strong>ICRA 2024</strong>（International Conference on Robotics and Automation）
+                    </li>
+                    <li><strong>发表 2 篇交通领域顶级期刊论文：</strong><br>
+                        · <strong>TIV 2024</strong>（IEEE Transactions on Intelligent Vehicles）（SCI一区）<br>
+                        · <strong>COMMTR 2024</strong>（Communications in Transportation Research）（SCI一区）
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Application Scenarios Section -->
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">应用场景</h2>
+                <div class="scenario-grid">
+                    <ul class="tech-list">
+                        <li><strong>城市自动驾驶出行：</strong>在城市复杂交通环境中提供高鲁棒性的感知与安全决策，适用于Robotaxi、城市公交等场景。</li>
+                        <li><strong>智慧园区/港口物流：</strong>在园区或港口内部实现固定路线自动运输任务，提升物流效率并降低人力依赖。</li>
+                        <li><strong>高速公路辅助驾驶：</strong>支持高车速场景下的车道保持、车辆跟随与变道超车等高阶辅助功能。</li>
+                        <li><strong>恶劣天气应急响应：</strong>在雨雪、低光等极端天气下保持稳定运行，辅助紧急物资运输与救援调度。</li>
+                        <li><strong>工业/矿区无人运输：</strong>部署于高危作业区，实现大型车辆或物料的无人搬运，保障人员安全。</li>
+                        <li><strong>军警/安防巡逻任务：</strong>用于边境监控、园区巡逻等低速自动驾驶任务，实现7×24小时自动监测。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer style="background:#2c2c2c; color:#fff; padding:40px 20px; text-align:center; font-size:14px; position:relative;">
+        <p>
+            <span style="color:#ffd700; font-weight:bold;">STRIDE</span>：
+            基于多模态大模型与安全轨迹生成的端到端自动驾驶系统
+        </p>
+        <p style="margin-top:10px;">
+            <a href="#!" style="color:#ccc; text-decoration:none; margin:0 10px;">项目代码</a> |
+            <a href="#!" style="color:#ccc; text-decoration:none; margin:0 10px;">团队介绍</a> |
+            <a href="#!" style="color:#ccc; text-decoration:none; margin:0 10px;">联系我们</a>
+        </p>
+        <!-- 返回顶部按钮 -->
+        <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' });"
+            style="position:fixed; bottom:30px; right:30px; background:#e74c3c; color:#fff; border:none; border-radius:50%; width:45px; height:45px; font-size:18px; cursor:pointer; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
+            ↑
+        </button>
+    </footer>
+</body>
+</html>
